@@ -48,7 +48,7 @@ Available split files include:
 - [`videomamba/video_sm/data/val.csv`](videomamba/video_sm/data/val.csv)
 - [`videomamba/video_sm/data/test.csv`](videomamba/video_sm/data/test.csv)
 - modality-specific test files under [`videomamba/video_sm/data`](videomamba/video_sm/data)
-- 
+
 ### 1.Download the MMHA-28 dataset from the official source
 ```
    tbd
