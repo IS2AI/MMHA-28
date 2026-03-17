@@ -1,21 +1,54 @@
-## MMHA-28: Human Action Recognition Across RGB, Depth, Thermal, and Event Modalities 
+## MMHAR-28: Human Action Recognition Across RGB, Depth, Thermal, and Event Modalities 
 
-This repository provides the official implementation, dataset, and training scripts for MMHA-28: Human Action Recognition Across RGB, Depth, Thermal, and Event Modalities paper. 
-It includes a codes adapted from the [VideoMamba](https://github.com/OpenGVLab/VideoMamba/tree/main?tab=readme-ov-file).
+This repository provides the official implementation, dataset, and training scripts for MMHAR-28: Human Action Recognition Across RGB, Depth, Thermal, and Event Modalities paper. 
+This repository builds on top of [VideoMamba](https://github.com/OpenGVLab/VideoMamba/tree/main?tab=readme-ov-file) and includes the training code, evaluation scripts, and the local `mamba` and `causal-conv1d` dependencies required by the model implementation.
 
-## Installation
-### 1. Clone the Repository
-cd mmha-28
-### 2. Pull the Docker image to ensure a consistent environment
-   ```
-   docker pull mmhm28/mmha-28:latest
+## Setup
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/IS2AI/MMHA-28.git
+cd MMHA-28
 ```
-### 3. Install the following local modules required by the VideoMamba architecture
+
+### 2. Optional: pull the Docker image
+
+If you use the provided container workflow, pull the published image:
+
+```bash
+docker pull mmhm28/mmha-28:latest
 ```
-   pip install -e mamba
-   pip install -e causal-conv1d
+
+### 3. Install Python dependencies
+
+Create and activate your environment first, then install the project requirements:
+
+```bash
+pip install -r requirements.txt
+pip install -e ./mamba
+pip install -e ./causal-conv1d
 ```
-## Our MMHA-28 Dataset
+
+## Our MMHAR-28 Dataset
+
+The project expects MMHA-28 data to be organized by split and modality. The CSV files in [`videomamba/video_sm/data`](videomamba/video_sm/data) show the expected path format.
+
+Examples:
+
+```text
+data/train/session_1/sub_18/d_rgb/28/rgb_images,13
+data/train/session_1/sub_7/d_rgb/26/depth_images,12
+data/train/session_1/sub_33/thermal/9_1_0,8
+data/train/session_1/sub_55/event-streams/15,7
+```
+
+Available split files include:
+
+- [`videomamba/video_sm/data/train.csv`](videomamba/video_sm/data/train.csv)
+- [`videomamba/video_sm/data/val.csv`](videomamba/video_sm/data/val.csv)
+- [`videomamba/video_sm/data/test.csv`](videomamba/video_sm/data/test.csv)
+- modality-specific test files under [`videomamba/video_sm/data`](videomamba/video_sm/data)
+- 
 ### 1.Download the MMHA-28 dataset from the official source
 ```
    tbd
@@ -25,24 +58,31 @@ Alternatively, a mini-sample version is available, containing data from one subj
 ```
 huggingface-cli upload tomirisss/mini-mmha . --repo-type=dataset
 ```
+
 ### 2. Visualization
 To visualize data from the mini-sample, run the following script with appropriate parameters:
 ```
    python vis.py --path PATH_TO_DATA --session session_1 --exp_num EXP_NUMBER
 ```
+
 ## Training
-Navigate to the directory of the project:
+
+Training is launched from [`videomamba/video_sm/run.py`](videomamba/video_sm/run.py).
+
+Before running training, review these values in that file:
+
+- `--nproc_per_node` to match the number of GPUs on your machine
+- `MODEL_PATH` if you want to start from a specific checkpoint
+- `DATA_PATH` and `PREFIX` if your dataset is stored outside the default relative layout
+- output directories such as `OUTPUT_DIR`
+
+Start training with:
+
+```bash
+cd videomamba/video_sm
+python run.py
 ```
-cd videomamba/video_sm/
-```
-The video folder paths used during training, validation, and testing are specified in the "data/" directory, within the train.csv, val.csv, and test.csv files.
-```
-   path_to_video_folder  human_action_class
-```
-To begin training on the MMHA-28 dataset, first edit line 23 of the run.py script to set the --nproc_per_node= parameter according to the number of GPUs available on your system. Then, run:
-```
-   python3 run.py
-```
+
 ## Evaluation
 To test a pretrained model, first download the final Multimodal VideoMamba checkpoint:
 [MV-Mamba](https://huggingface.co/tomirisss/MV-Mamba)
