@@ -30,7 +30,7 @@ Available split files include:
 
 ### 1.Download the MMHA-28 dataset from the official source [Hugging Face](https://huggingface.co/datasets/issai/MMHA_28):
 ```
-   hf download issai/MMHA_28 --repo-type dataset --local-dir .
+hf download issai/MMHA_28 --repo-type dataset --local-dir .
 ```
 Alternatively, a mini-sample version is available, containing data from one subject in session_1 and session_2, across all human actions. This is option for testing and visualization:
 [mini-mmha-28](https://huggingface.co/datasets/tomirisss/mini-mmha)
