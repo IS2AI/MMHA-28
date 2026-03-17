@@ -141,6 +141,10 @@ source .venv/bin/activate
 python tools/test.py configs/recognition/tsm/tsm_multimodal_mmha28_32.py work_dirs/tsm_multimodal_mmha28_32/best_acc_top1_epoch_95.pth
 ```
 
-MMAction2 reference:
+
+## Citation
+
+If you use the MMHA-28 dataset or code in your research, please cite our paper.
+
 
 - [OpenMMLab/mmaction2](https://github.com/open-mmlab/mmaction2)
