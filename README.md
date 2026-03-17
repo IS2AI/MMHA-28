@@ -62,7 +62,7 @@ If you use the provided container workflow, pull the published image:
 docker pull mmhm28/mmha-28:latest
 ```
 
-## Training
+### 3. Training
 
 Training is launched from [`videomamba/video_sm/run.py`](videomamba/video_sm/run.py).
 
@@ -80,7 +80,7 @@ cd videomamba/video_sm
 python run.py
 ```
 
-## Evaluation
+### 4. Evaluation
 To test a pretrained model, first download the final Multimodal VideoMamba checkpoint:
 [MV-Mamba](https://huggingface.co/tomirisss/MV-Mamba)
 or using this code:
