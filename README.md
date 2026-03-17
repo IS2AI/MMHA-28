@@ -1,33 +1,12 @@
 ## MMHAR-28: Human Action Recognition Across RGB, Depth, Thermal, and Event Modalities 
 
 This repository provides the official implementation, dataset, and training scripts for MMHAR-28: Human Action Recognition Across RGB, Depth, Thermal, and Event Modalities paper. 
+
+This repository contains two model pipelines for the same MMHAR-28 dataset:
+- `videomamba/`: the VideoMamba-based implementation
+- `tsm_timeSformer/`: an MMAction2-based TSM/TimeSformer training pipeline for MMHAR-28
+
 This repository builds on top of [VideoMamba](https://github.com/OpenGVLab/VideoMamba/tree/main?tab=readme-ov-file) and includes the training code, evaluation scripts, and the local `mamba` and `causal-conv1d` dependencies required by the model implementation.
-
-## Setup
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/IS2AI/MMHA-28.git
-cd MMHA-28
-```
-
-### 2. Optional: pull the Docker image
-
-If you use the provided container workflow, pull the published image:
-
-```bash
-docker pull mmhm28/mmha-28:latest
-```
-
-### 3. Install Python dependencies
-
-Create and activate your environment first, then install the project requirements:
-
-```bash
-pip install -r requirements.txt
-pip install -e ./mamba
-pip install -e ./causal-conv1d
-```
 
 ## Our MMHAR-28 Dataset
 
@@ -65,6 +44,24 @@ To visualize data from the mini-sample, run the following script with appropriat
    python vis.py --path PATH_TO_DATA --session session_1 --exp_num EXP_NUMBER
 ```
 
+## VideoMamba Pipeline
+### Installation
+### 1. Install the dependencies:
+
+```bash
+pip install -r requirements.txt
+pip install -e ./mamba
+pip install -e ./causal-conv1d
+```
+
+### 2. Optional: pull the Docker image
+
+If you use the provided container workflow, pull the published image:
+
+```bash
+docker pull mmhm28/mmha-28:latest
+```
+
 ## Training
 
 Training is launched from [`videomamba/video_sm/run.py`](videomamba/video_sm/run.py).
@@ -96,3 +93,54 @@ Then, run the script, updating the --num_frames parameter and specifying the app
    python3 run_test.py
 ```
 
+## TSM / TimeSformer Pipeline
+### Installation
+
+The `tsm` directory is a local MMAction2-based codebase. Install it from this repository, not from a separate external checkout.
+
+Recommended setup:
+
+```bash
+cd tsm
+python -m venv .venv
+source .venv/bin/activate
+pip install -U pip setuptools wheel
+pip install -r requirements/build.txt
+pip install -r requirements/mminstall.txt
+pip install -e .
+```
+
+Important dependency notes:
+
+- local MMAction version: `1.2.0`
+- required `mmcv`: `>=2.0.0rc4,<2.2.0`
+- required `mmengine`: `>=0.7.1,<1.0.0`
+
+If you already have PyTorch installed, keep it compatible with your CUDA setup before installing the MMAction stack.
+
+Main entrypoints:
+
+- [`tsm/README.md`](tsm/README.md)
+- [`tsm/configs/recognition/tsm/tsm_multimodal_mmha28_32.py`](tsm/configs/recognition/tsm/tsm_multimodal_mmha28_32.py)
+- [`tsm/tools/train.py`](tsm/tools/train.py)
+- [`tsm/tools/test.py`](tsm/tools/test.py)
+
+Run TSM training:
+
+```bash
+cd tsm
+source .venv/bin/activate
+python tools/train.py configs/recognition/tsm/tsm_multimodal_mmha28_32.py
+```
+
+Run TSM evaluation:
+
+```bash
+cd tsm
+source .venv/bin/activate
+python tools/test.py configs/recognition/tsm/tsm_multimodal_mmha28_32.py work_dirs/tsm_multimodal_mmha28_32/best_acc_top1_epoch_95.pth
+```
+
+MMAction2 reference:
+
+- [OpenMMLab/mmaction2](https://github.com/open-mmlab/mmaction2)
