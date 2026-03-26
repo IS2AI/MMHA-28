@@ -144,10 +144,8 @@ MMAction2 reference:
 
 - [OpenMMLab/mmaction2](https://github.com/open-mmlab/mmaction2)
 
-## Citation
-
-If you use the MMHA-28 dataset or code in your research, please cite our paper:
-
+### If you use the dataset/source code/pre-trained models in your research, please cite our work:
+```
 @ARTICLE{11447325,
   author={Rakhimzhanova, Tomiris and Kuzdeuov, Askat and Muratov, Artur and Varol, Huseyin Atakan},
   journal={IEEE Transactions on Biometrics, Behavior, and Identity Science}, 
@@ -158,5 +156,5 @@ If you use the MMHA-28 dataset or code in your research, please cite our paper:
   pages={1-1},
   keywords={Videos;Cameras;Event detection;Thermal sensors;Sensors;Web sites;Video on demand;Three-dimensional displays;Software;Lighting;Human action recognition (HAR);multimodal learning;RGB;depth;thermal;event-based camera;multimodal dataset;video classification;deep learning},
   doi={10.1109/TBIOM.2026.3675639}}
-
+```
 
