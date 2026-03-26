@@ -1,5 +1,5 @@
 ## MMHAR-28: Human Action Recognition Across RGB, Depth, Thermal, and Event Modalities 
-![MMHAR-28 Teaser](assets/Teaser%20image.png)
+![MMHAR-28 Teaser](Teaser%20image.png)
 
 This repository provides the official implementation, dataset, and training scripts for MMHAR-28: Human Action Recognition Across RGB, Depth, Thermal, and Event Modalities paper. 
 
