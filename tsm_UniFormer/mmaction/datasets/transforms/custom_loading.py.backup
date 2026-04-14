@@ -1,0 +1,99 @@
+from .loading import RawFrameDecode
+import os.path as osp
+import copy as cp
+import mmcv
+import numpy as np
+from mmaction.registry import TRANSFORMS
+from mmengine.fileio import get as mmengine_get
+
+@TRANSFORMS.register_module()
+class CustomRawFrameDecode(RawFrameDecode):
+    def transform(self, results: dict) -> dict:
+        mmcv.use_backend(self.decoding_backend)
+        directory = results['frame_dir']
+        modality = results['modality']
+        imgs = list()
+        if results['frame_inds'].ndim != 1:
+            results['frame_inds'] = np.squeeze(results['frame_inds'])
+        offset = results.get('offset', 0)
+        cache = {}
+        frame_list = results.get('frame_list', None)
+
+        for i, frame_idx in enumerate(results['frame_inds']):
+            if frame_idx in cache:
+                imgs.append(cp.deepcopy(imgs[cache[frame_idx]]))
+                continue
+            else:
+                cache[frame_idx] = i
+            frame_idx += offset
+
+            if modality == 'RGB':
+                if frame_list is not None:
+                    if frame_idx < 1 or frame_idx > len(frame_list):
+                        raise IndexError(f"Frame index {frame_idx} out of range for frame_list of length {len(frame_list)}")
+                    filename = frame_list[frame_idx - 1]
+                    filepath = osp.join(directory, filename)
+                else:
+                    filename_tmpl = results['filename_tmpl']
+                    filepath = osp.join(directory, filename_tmpl.format(frame_idx))
+                img_bytes = mmengine_get(filepath)
+                cur_frame = mmcv.imfrombytes(img_bytes, channel_order='rgb')
+                imgs.append(cur_frame)
+
+            elif modality == 'Flow':
+                filename_tmpl = results['filename_tmpl']
+                x_filepath = osp.join(directory, filename_tmpl.format('x', frame_idx))
+                y_filepath = osp.join(directory, filename_tmpl.format('y', frame_idx))
+                x_img_bytes = mmengine_get(x_filepath)
+                x_frame = mmcv.imfrombytes(x_img_bytes, flag='grayscale')
+                y_img_bytes = mmengine_get(y_filepath)
+                y_frame = mmcv.imfrombytes(y_img_bytes, flag='grayscale')
+                imgs.append(np.stack([x_frame, y_frame], axis=-1))
+
+            elif modality == 'Event':
+                filename_tmpl = results['filename_tmpl']
+                filepath = osp.join(directory, filename_tmpl.format(frame_idx))
+                cur_frame = np.load(filepath)
+
+                # Handle different shapes robustly
+                if cur_frame.ndim == 2:
+                    cur_frame = np.expand_dims(cur_frame, axis=-1)  # [H, W, 1]
+                elif cur_frame.ndim == 3 and cur_frame.shape[0] <= 4:
+                    cur_frame = np.transpose(cur_frame, (1, 2, 0))  # [C, H, W] → [H, W, C]
+
+                if cur_frame.shape[2] == 1:
+                    cur_frame = np.repeat(cur_frame, 3, axis=-1)  # [H, W, 3]
+
+                imgs.append(cur_frame.astype(np.float32))
+                
+            elif modality == 'Thermal':
+                filename_tmpl = results['filename_tmpl']
+                filepath = osp.join(directory, filename_tmpl.format(frame_idx))
+                img_bytes = mmengine_get(filepath)
+                cur_frame = mmcv.imfrombytes(img_bytes, flag='grayscale')
+
+                if cur_frame.ndim == 2:
+                    cur_frame = np.expand_dims(cur_frame, axis=-1)
+                if cur_frame.shape[2] == 1:
+                    cur_frame = np.repeat(cur_frame, 3, axis=-1)
+
+                imgs.append(cur_frame.astype(np.float32))
+            else:
+                raise NotImplementedError(f"Unsupported modality: {modality}")
+
+        results['imgs'] = imgs
+        results['original_shape'] = imgs[0].shape[:2]
+        results['img_shape'] = imgs[0].shape[:2]
+
+        if 'gt_bboxes' in results:
+            h, w = results['img_shape']
+            scale_factor = np.array([w, h, w, h])
+            gt_bboxes = results['gt_bboxes']
+            gt_bboxes = (gt_bboxes * scale_factor).astype(np.float32)
+            results['gt_bboxes'] = gt_bboxes
+            if 'proposals' in results and results['proposals'] is not None:
+                proposals = results['proposals']
+                proposals = (proposals * scale_factor).astype(np.float32)
+                results['proposals'] = proposals
+
+        return results
